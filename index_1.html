@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solicitação de Reembolso</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --orange:     #FF6B2B;
+      --orange-lt:  #FF8C52;
+      --orange-bg:  #FFF3ED;
+      --pink:       #F43F7F;
+      --pink-lt:    #FF6FA8;
+      --pink-bg:    #FFF0F6;
+      --dark:       #1A0A00;
+      --muted:      #8C6A5A;
+      --border:     #F0D5C8;
+      --white:      #FFFFFF;
+      --radius:     14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #FDF6F2;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Decorative blobs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 420px; height: 420px;
+      background: var(--orange);
+      top: -100px; left: -120px;
+    }
+    body::after {
+      width: 380px; height: 380px;
+      background: var(--pink);
+      bottom: -80px; right: -100px;
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--white);
+      border-radius: 24px;
+      padding: 48px 44px 44px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow:
+        0 2px 4px rgba(244,63,127,.06),
+        0 8px 24px rgba(255,107,43,.10),
+        0 32px 64px rgba(255,107,43,.08);
+      border: 1.5px solid var(--border);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .logo-icon {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--orange), var(--pink));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(255,107,43,.35);
+    }
+    .logo-icon svg { width: 26px; height: 26px; }
+    .header-text h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem;
+      color: var(--dark);
+      line-height: 1.2;
+    }
+    .header-text p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 500;
+      letter-spacing: .02em;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1.5px;
+      background: linear-gradient(90deg, var(--orange) 0%, var(--pink) 100%);
+      border-radius: 2px;
+      margin-bottom: 28px;
+      opacity: .22;
+    }
+
+    /* Fields */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 20px;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--orange);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 400;
+      color: var(--dark);
+      background: var(--orange-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      width: 100%;
+      -webkit-appearance: none;
+    }
+    input::placeholder, textarea::placeholder { color: #C4A598; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--pink);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(244,63,127,.12);
+    }
+
+    /* Custom select arrow */
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23F43F7F' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    select option { background: #fff; }
+
+    textarea { resize: vertical; min-height: 84px; line-height: 1.5; }
+
+    /* Valor field — prefix */
+    .input-prefix { position: relative; }
+    .input-prefix span {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      font-weight: 600; color: var(--orange); font-size: 0.92rem; pointer-events: none;
+    }
+    .input-prefix input { padding-left: 34px; }
+
+    /* Submit */
+    .btn {
+      margin-top: 28px;
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--pink) 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: .02em;
+      box-shadow: 0 6px 20px rgba(244,63,127,.30);
+      transition: opacity .2s, transform .15s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 10px 28px rgba(244,63,127,.36); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    /* Toast */
+    .toast {
+      display: none;
+      margin-top: 18px;
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      font-size: 0.88rem;
+      font-weight: 500;
+      text-align: center;
+      animation: fadeIn .3s ease;
+    }
+    .toast.success { background: #FFF0F6; color: var(--pink); border: 1.5px solid #FFBAD6; display: block; }
+    .toast.error   { background: #FFF3ED; color: var(--orange); border: 1.5px solid #FFBFA3; display: block; }
+
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+      .card { padding: 32px 22px 28px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: 1; }
+      .header-text h1 { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-4H9l3-7 3 7h-2v4z" fill="white"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>Solicitação de Reembolso</h1>
+      <p>Preencha o formulário abaixo para enviar sua despesa</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <form id="reembolsoForm">
+    <div class="form-grid">
+
+      <div class="field full">
+        <label for="nome">Nome do Solicitante</label>
+        <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required />
+      </div>
+
+      <div class="field">
+        <label for="data">Data da Despesa</label>
+        <input type="date" id="data" name="data" required />
+      </div>
+
+      <div class="field">
+        <label for="categoria">Categoria</label>
+        <select id="categoria" name="categoria" required>
+          <option value="" disabled selected>Selecione...</option>
+          <option>Alimentação</option>
+          <option>Transporte</option>
+          <option>Hospedagem</option>
+          <option>Material de escritório</option>
+          <option>Comunicação</option>
+          <option>Treinamento / Cursos</option>
+          <option>Saúde</option>
+          <option>Outros</option>
+        </select>
+      </div>
+
+      <div class="field full">
+        <label for="descricao">Descrição / Motivo</label>
+        <textarea id="descricao" name="descricao" placeholder="Descreva a despesa e seu motivo..." required></textarea>
+      </div>
+
+      <div class="field">
+        <label for="valor">Valor (R$)</label>
+        <div class="input-prefix">
+          <span>R$</span>
+          <input type="number" id="valor" name="valor" placeholder="0,00" step="0.01" min="0.01" required />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="pagamento">Forma de Pagamento</label>
+        <select id="pagamento" name="pagamento" required>
+          <option value="" disabled selected>Selecione...</option>
+          <option>Cartão corporativo</option>
+          <option>Cartão pessoal</option>
+          <option>Dinheiro</option>
+          <option>PIX</option>
+          <option>Transferência bancária</option>
+        </select>
+      </div>
+
+    </div>
+
+    <button class="btn" type="submit" id="submitBtn">Enviar Solicitação</button>
+    <div class="toast" id="toast"></div>
+  </form>
+</div>
+
+<script>
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvLhbNwmIUcc4PY2VSYs_EMy9GlgWOvQjooBUq-sEMVOsxPwPyVj8qGztUfa1w29J0/exec";
+
+  const form = document.getElementById('reembolsoForm');
+  const btn  = document.getElementById('submitBtn');
+  const toast = document.getElementById('toast');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    toast.className = 'toast';
+
+    const payload = {
+      nome:      document.getElementById('nome').value,
+      data:      document.getElementById('data').value,
+      categoria: document.getElementById('categoria').value,
+      descricao: document.getElementById('descricao').value,
+      valor:     document.getElementById('valor').value,
+      pagamento: document.getElementById('pagamento').value,
+    };
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      toast.textContent = '✅ Solicitação enviada com sucesso!';
+      toast.className = 'toast success';
+      form.reset();
+    } catch {
+      toast.textContent = '❌ Erro ao enviar. Verifique sua conexão e tente novamente.';
+      toast.className = 'toast error';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Enviar Solicitação';
+    }
+  });
+</script>
+
+</body>
+</html>
